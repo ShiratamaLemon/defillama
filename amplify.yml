@@ -1,0 +1,16 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - pip install -r requirements.txt
+    build:
+      commands:
+        - python main.py --no-browser
+  artifacts:
+    baseDirectory: output
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - cache/**/*

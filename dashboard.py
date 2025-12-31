@@ -720,7 +720,7 @@ class DashboardGenerator:
         
         return html
     
-    def save_dashboard(self, scores: List[AirdropScore], filename: str = "airdrop_candidates.html") -> Path:
+    def save_dashboard(self, scores: List[AirdropScore], filename: str = "index.html") -> Path:
         """
         Generate and save the dashboard HTML.
         
