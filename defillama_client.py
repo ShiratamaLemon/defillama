@@ -163,6 +163,8 @@ class DeFilLamaClient:
         
         return recent
     
+
+    
     def clear_cache(self) -> None:
         """Clear all cached data."""
         for cache_file in self.CACHE_DIR.glob("*.json"):

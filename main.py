@@ -121,6 +121,9 @@ def print_console_report(limit: int = 20):
     for i, s in enumerate(scores, 1):
         tokenless = "🟢 NO TOKEN" if s.is_tokenless else "⚪ Has Token"
         
+        if s.has_points:
+            tokenless += " | 🎁 POINTS"
+            
         # Format TVL
         if s.tvl >= 1_000_000_000:
             tvl_str = f"${s.tvl / 1_000_000_000:.2f}B"

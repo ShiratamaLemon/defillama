@@ -360,6 +360,33 @@ class DashboardGenerator:
             color: var(--text-secondary);
         }}
         
+        /* New Styles for Phase 2 */
+        .points-badge {{
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 700;
+            margin-left: 0.5rem;
+            white-space: nowrap;
+        }}
+        
+        .score-high {{
+            background: linear-gradient(135deg, var(--accent-green), #059669);
+            color: #000;
+        }}
+        
+        .score-medium {{
+            background: linear-gradient(135deg, var(--accent-yellow), #d97706);
+            color: #000;
+        }}
+        
+        .score-low {{
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }}
+        
         .tvl {{
             font-weight: 600;
             font-family: 'SF Mono', 'Monaco', monospace;
@@ -539,6 +566,7 @@ class DashboardGenerator:
         <div class="filters">
             <button class="filter-btn active" onclick="filterTable('all')">すべて</button>
             <button class="filter-btn" onclick="filterTable('tokenless')">トークン未発行のみ</button>
+            <button class="filter-btn" onclick="filterTable('points')">Pointsあり</button>
             <button class="filter-btn" onclick="filterTable('vc')">Tier-1 VC支援</button>
             <button class="filter-btn" onclick="filterTable('high-score')">高スコア (50+)</button>
             <input type="text" class="search-box" placeholder="🔍 プロジェクト名で検索..." oninput="searchTable(this.value)">
@@ -589,6 +617,7 @@ class DashboardGenerator:
             html += f'''
                     <tr data-tokenless="{str(score.is_tokenless).lower()}" 
                         data-vc="{str(bool(score.tier1_vcs)).lower()}"
+                        data-points="{str(score.has_points).lower()}"
                         data-score="{score.total_score}"
                         data-name="{score.protocol_name.lower()}">
                         <td class="rank">{i}</td>
@@ -598,6 +627,7 @@ class DashboardGenerator:
                                     {score.protocol_name}
                                 </a>
                                 {tokenless_badge}
+                                {'<span class="points-badge">Points</span>' if score.has_points else ''}
                             </span>
                         </td>
                         <td>
@@ -675,6 +705,9 @@ class DashboardGenerator:
                 switch(filter) {
                     case 'tokenless':
                         show = row.dataset.tokenless === 'true';
+                        break;
+                    case 'points':
+                        show = row.dataset.points === 'true';
                         break;
                     case 'vc':
                         show = row.dataset.vc === 'true';

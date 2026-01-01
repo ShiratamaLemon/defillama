@@ -105,6 +105,7 @@ class AirdropScore:
     recency_score: int = 0
     category_score: int = 0
     tvl_size_score: int = 0
+    points_score: int = 0       # [NEW] Score for points
     
     # Additional info
     funding_amount: float = 0
@@ -112,6 +113,9 @@ class AirdropScore:
     tier1_vcs: List[str] = field(default_factory=list)
     tier2_vcs: List[str] = field(default_factory=list)
     all_investors: List[str] = field(default_factory=list)
+    
+    # [NEW] Metrics
+    has_points: bool = False
     
     # Links
     url: Optional[str] = None
@@ -240,12 +244,13 @@ class AirdropScorer:
         """
         Calculate the airdrop potential score for a protocol.
         
-        Scoring criteria (100 points max):
+        Scoring criteria (1xx points max):
         - No token yet: +30 points
         - High funding amount: up to +25 points
         - Tier-1 VC backing: up to +20 points
         - TVL growth: up to +15 points
         - Recent listing: up to +10 points
+        - Points System: +10 points (bonus)
         - Hot category: up to +5 points (bonus)
         - Large TVL: up to +5 points (bonus)
         """
@@ -260,6 +265,10 @@ class AirdropScorer:
         listed_at = datetime.fromtimestamp(listed_at_ts) if listed_at_ts else None
         url = protocol.get("url")
         twitter = protocol.get("twitter")
+        description = protocol.get("description", "") or ""
+        
+        # [NEW] Active Users & Points
+        has_points = "points" in description.lower() or "airdrop program" in description.lower()
         
         # Find funding info
         raises = self._find_raises_for_protocol(protocol)
@@ -278,6 +287,7 @@ class AirdropScorer:
             "recency": 0,
             "category": 0,
             "tvl_size": 0,
+            "points": 0,
         }
         
         # Tokenless bonus (30 points)
@@ -348,6 +358,10 @@ class AirdropScorer:
             scores["tvl_size"] = 3
         elif tvl >= 1_000_000:  # $1M+
             scores["tvl_size"] = 2
+            
+        # [NEW] Points System bonus (+10 points)
+        if has_points:
+            scores["points"] = 10
         
         total_score = sum(scores.values())
         
@@ -368,11 +382,13 @@ class AirdropScorer:
             recency_score=scores["recency"],
             category_score=scores["category"],
             tvl_size_score=scores["tvl_size"],
+            points_score=scores["points"],
             funding_amount=total_funding,
             funding_rounds=raises,
             tier1_vcs=tier1_vcs,
             tier2_vcs=tier2_vcs,
             all_investors=all_investors,
+            has_points=has_points,
             url=url,
             twitter=twitter,
         )
@@ -382,7 +398,7 @@ class AirdropScorer:
         Score all protocols and return sorted by score.
         
         Args:
-            min_tvl: Minimum TVL to consider (filter out tiny protocols)
+            min_tvl: Minimum TVL to consider
             
         Returns:
             List of AirdropScore objects sorted by total_score descending
