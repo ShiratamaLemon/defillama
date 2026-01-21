@@ -197,6 +197,7 @@ class AirdropScorer:
         
         # Build lookup tables
         self._build_raise_lookup()
+        self._build_parent_lookup()
     
     def _build_raise_lookup(self) -> None:
         """Build a lookup table for raises by protocol name."""
@@ -216,6 +217,40 @@ class AirdropScorer:
                 if key not in self.raise_lookup:
                     self.raise_lookup[key] = []
                 self.raise_lookup[key].append(raise_data)
+    
+    def _build_parent_lookup(self) -> None:
+        """
+        Build lookup tables for parent-child protocol relationships.
+        
+        This allows us to check if a child protocol's parent already has a token,
+        which means the child should not be considered "tokenless".
+        
+        Since parent protocols like "ethena" may not exist as separate entries,
+        we check if ANY sibling protocol (same parentProtocol) has a token.
+        """
+        # Map: child_slug -> parent_id
+        self.child_to_parent: Dict[str, str] = {}
+        # Map: parent_id -> True if any child has a token
+        self.parent_has_token: Dict[str, bool] = {}
+        
+        # First pass: build child_to_parent and detect if any child has a token
+        for protocol in self.protocols:
+            slug = protocol.get("slug", "")
+            parent_ref = protocol.get("parentProtocol", "")
+            
+            if parent_ref and slug:
+                # parentProtocol is like "parent#ethena"
+                parent_id = parent_ref.replace("parent#", "").lower()
+                self.child_to_parent[slug.lower()] = parent_id
+                
+                # Check if THIS child has a token (then parent family has a token)
+                symbol = protocol.get("symbol", "-")
+                gecko_id = protocol.get("gecko_id")
+                cmc_id = protocol.get("cmcId")
+                
+                if symbol != "-" or gecko_id is not None or cmc_id is not None:
+                    # This sibling has a token, mark the parent family as having a token
+                    self.parent_has_token[parent_id] = True
     
     def _normalize_name(self, name: str) -> str:
         """Normalize protocol name for matching."""
@@ -298,12 +333,29 @@ class AirdropScorer:
         return tier1, tier2, high_airdrop, list(set(all_investors))
     
     def _is_tokenless(self, protocol: Dict) -> bool:
-        """Check if a protocol doesn't have a token yet."""
+        """
+        Check if a protocol doesn't have a token yet.
+        
+        Also checks if a parent protocol (or any sibling) has a token - if so, 
+        the child is considered to have a token too (e.g., Ethena tsUSDe -> Ethena/ENA).
+        """
         symbol = protocol.get("symbol", "-")
         gecko_id = protocol.get("gecko_id")
         cmc_id = protocol.get("cmcId")
         
-        return symbol == "-" and gecko_id is None and cmc_id is None
+        # If this protocol directly has a token, it's not tokenless
+        if symbol != "-" or gecko_id is not None or cmc_id is not None:
+            return False
+        
+        # Check if any sibling under the same parent has a token
+        slug = protocol.get("slug", "").lower()
+        if slug in self.child_to_parent:
+            parent_id = self.child_to_parent[slug]
+            # If any sibling has a token, this protocol family has a token
+            if self.parent_has_token.get(parent_id, False):
+                return False
+        
+        return True
     
     def _detect_project_stage(self, raises: List[Dict], total_funding: float) -> str:
         """
