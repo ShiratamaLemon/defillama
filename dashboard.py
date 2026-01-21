@@ -372,6 +372,46 @@ class DashboardGenerator:
             white-space: nowrap;
         }}
         
+        .hidden-gem-badge {{
+            background: linear-gradient(135deg, #8B5CF6, #EC4899);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 700;
+            margin-left: 0.5rem;
+            white-space: nowrap;
+            animation: gem-pulse 2s ease-in-out infinite;
+        }}
+        
+        @keyframes gem-pulse {{
+            0%, 100% {{ box-shadow: 0 0 5px rgba(139, 92, 246, 0.5); }}
+            50% {{ box-shadow: 0 0 15px rgba(236, 72, 153, 0.8); }}
+        }}
+        
+        .high-airdrop-vc {{
+            background: linear-gradient(135deg, #EF4444, #F97316) !important;
+            color: white !important;
+        }}
+        
+        .stage-badge {{
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-weight: 500;
+            margin-left: 0.3rem;
+        }}
+        
+        .stage-seed {{
+            background: var(--accent-green);
+            color: #000;
+        }}
+        
+        .stage-series-a {{
+            background: var(--accent-blue);
+            color: white;
+        }}
+        
         .score-high {{
             background: linear-gradient(135deg, var(--accent-green), #059669);
             color: #000;
@@ -561,12 +601,22 @@ class DashboardGenerator:
                 <div class="stat-value">{len([s for s in scores if s.total_score >= 50])}</div>
                 <div class="stat-label">高スコア (50+)</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-value">{len([s for s in scores if s.is_hidden_gem])}</div>
+                <div class="stat-label">💎 Hidden Gem</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{len([s for s in scores if s.high_airdrop_vcs])}</div>
+                <div class="stat-label">🔥 高エアドロVC</div>
+            </div>
         </div>
         
         <div class="filters">
             <button class="filter-btn active" onclick="filterTable('all')">すべて</button>
             <button class="filter-btn" onclick="filterTable('tokenless')">トークン未発行のみ</button>
             <button class="filter-btn" onclick="filterTable('points')">Pointsあり</button>
+            <button class="filter-btn" onclick="filterTable('hidden-gem')">💎 Hidden Gem</button>
+            <button class="filter-btn" onclick="filterTable('high-airdrop-vc')">🔥 高エアドロVC</button>
             <button class="filter-btn" onclick="filterTable('vc')">Tier-1 VC支援</button>
             <button class="filter-btn" onclick="filterTable('high-score')">高スコア (50+)</button>
             <input type="text" class="search-box" placeholder="🔍 プロジェクト名で検索..." oninput="searchTable(this.value)">
@@ -592,10 +642,24 @@ class DashboardGenerator:
         
         for i, score in enumerate(scores, 1):
             tokenless_badge = '<span class="token-badge badge-tokenless">No Token</span>' if score.is_tokenless else ''
+            hidden_gem_badge = '<span class="hidden-gem-badge">💎 Hidden Gem</span>' if score.is_hidden_gem else ''
+            
+            # Stage badge
+            stage_badge = ""
+            if score.project_stage == "seed":
+                stage_badge = '<span class="stage-badge stage-seed">Seed</span>'
+            elif score.project_stage == "series_a":
+                stage_badge = '<span class="stage-badge stage-series-a">Series A</span>'
             
             vc_html = ""
+            # First show high airdrop VCs with special styling
+            for vc in score.high_airdrop_vcs[:2]:
+                vc_html += f'<span class="vc-badge high-airdrop-vc">🔥{vc}</span>'
+            # Then regular tier1 VCs (excluding already shown)
+            high_airdrop_names = [v.lower() for v in score.high_airdrop_vcs]
             for vc in score.tier1_vcs[:3]:
-                vc_html += f'<span class="vc-badge">{vc}</span>'
+                if vc.lower() not in high_airdrop_names:
+                    vc_html += f'<span class="vc-badge">{vc}</span>'
             for vc in score.tier2_vcs[:2]:
                 vc_html += f'<span class="vc-badge tier2">{vc}</span>'
             
@@ -618,6 +682,8 @@ class DashboardGenerator:
                     <tr data-tokenless="{str(score.is_tokenless).lower()}" 
                         data-vc="{str(bool(score.tier1_vcs)).lower()}"
                         data-points="{str(score.has_points).lower()}"
+                        data-hidden-gem="{str(score.is_hidden_gem).lower()}"
+                        data-high-airdrop-vc="{str(bool(score.high_airdrop_vcs)).lower()}"
                         data-score="{score.total_score}"
                         data-name="{score.protocol_name.lower()}">
                         <td class="rank">{i}</td>
@@ -627,7 +693,9 @@ class DashboardGenerator:
                                     {score.protocol_name}
                                 </a>
                                 {tokenless_badge}
+                                {hidden_gem_badge}
                                 {'<span class="points-badge">Points</span>' if score.has_points else ''}
+                                {stage_badge}
                             </span>
                         </td>
                         <td>
@@ -651,7 +719,7 @@ class DashboardGenerator:
         
         <footer>
             <p>データソース: <a href="https://defillama.com" target="_blank" style="color: var(--accent-purple);">DeFilLama</a> | 
-               Airdrop Discovery System v1.0</p>
+               Airdrop Discovery System v2.0</p>
         </footer>
     </div>
     
@@ -708,6 +776,12 @@ class DashboardGenerator:
                         break;
                     case 'points':
                         show = row.dataset.points === 'true';
+                        break;
+                    case 'hidden-gem':
+                        show = row.dataset.hiddenGem === 'true';
+                        break;
+                    case 'high-airdrop-vc':
+                        show = row.dataset.highAirdropVc === 'true';
                         break;
                     case 'vc':
                         show = row.dataset.vc === 'true';
