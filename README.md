@@ -1,58 +1,58 @@
 # Airdrop Discovery System
 
-DeFilLama APIを活用して、将来エアドロップの可能性がある有望なプロジェクトを自動的に発見・ランキングするシステム。
+A system that leverages the DeFilLama API to automatically discover and rank promising DeFi projects with high airdrop potential.
 
-## 機能
+## Features
 
-- 🪂 **トークン未発行プロジェクト検出** - まだトークンを発行していないプロジェクトを自動抽出
-- 💰 **VC分析** - a16z、Paradigm等のTier-1 VCが投資しているプロジェクトを優先表示
-- 📊 **スコアリング** - TVL成長率、調達額、VCの質を基にAirdrop可能性をスコア化
-- 🎨 **HTMLダッシュボード** - 視覚的にランキングを確認できるWebページを生成
+- 🪂 **Tokenless Detection** - Automatically identifies projects that haven't launched a token yet.
+- 💰 **VC Analysis** - Prioritizes projects backed by Tier-1 VCs like a16z, Dragonfly, and Binance Labs.
+- 📊 **Smart Scoring** - Calculates airdrop probabilities based on TVL growth, funding amount, VC quality, and project stage.
+- 💎 **Hidden Gem Discovery** - Highlights early-stage, low-TVL projects with strong backing.
+- 🎨 **HTML Dashboard** - Generates a visual dashboard to explore and filter rankings.
 
-## セットアップ
+## Setup
 
 ```bash
-# 依存関係をインストール
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-## 使い方
+## Usage
 
 ```bash
-# ダッシュボードを生成してブラウザで開く
+# Generate dashboard and open in browser
 python main.py
 
-# コンソールでトップ20を確認
+# View top 20 candidates in console
 python main.py --console --top 20
 
-# API接続をテスト
+# Test API connectivity
 python main.py --test-api
 
-# キャッシュをクリアして最新データを取得
+# Clear cache and fetch fresh data
 python main.py --clear-cache
 ```
 
-## スコアリング基準
+## Scoring Criteria (v2.1)
 
-| 基準 | 最大点数 | 説明 |
-|------|---------|------|
-| トークン未発行 | +30 | まだ独自トークンがないプロジェクト |
-| 資金調達額 | +25 | $10M以上の調達で高得点 |
-| Tier-1 VC支援 | +20 | Paradigm, a16z等の参加 |
-| TVL成長率 | +15 | 7日間でのTVL成長 |
-| リスト新しさ | +10 | 6ヶ月以内にリストされた |
+| Criterion | Max Points | Description |
+|-----------|------------|-------------|
+| Tier 1: Core Signal | 40 | Tokenless (+12), Points (+15), High Airdrop VC (+13) |
+| Tier 2: Quality | 35 | Funding Amount (+15), Tier-1 VC (+12), Tier-2 VC (+8) |
+| Tier 3: Timing | 25 | Recency (+10), Project Stage - Seed/Series A (+10) |
+| Tier 4: Bonus | 30 | TVL Growth (+8), Hidden Gem (+10), Category (+5) |
 
-## ファイル構成
+## File Structure
 
 ```
-├── main.py              # エントリーポイント
-├── defillama_client.py  # DeFilLama API クライアント
-├── airdrop_scorer.py    # スコアリングエンジン
-├── dashboard.py         # HTMLダッシュボード生成
-├── requirements.txt     # Python依存関係
-└── output/              # 生成されたダッシュボード
+├── main.py              # Entry point
+├── defillama_client.py  # DeFilLama API Client
+├── airdrop_scorer.py    # Scoring Engine
+├── dashboard.py         # HTML Dashboard Generator
+├── requirements.txt     # Dependencies
+└── output/              # Generated Dashboards
 ```
 
-## データソース
+## Data Source
 
-- [DeFilLama](https://defillama.com/) - DeFiプロトコルのTVL・資金調達データ
+- [DeFilLama](https://defillama.com/) - DeFi Protocol TVL & Funding Data

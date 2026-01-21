@@ -69,7 +69,7 @@ class DashboardGenerator:
         generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         html = f'''<!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -581,25 +581,25 @@ class DashboardGenerator:
                 <span id="theme-text">Dark</span>
             </button>
             <h1>🪂 Airdrop Discovery Dashboard</h1>
-            <p class="subtitle">DeFilLama データに基づく有望プロジェクト分析 | 最終更新: {generated_at}</p>
+            <p class="subtitle">Analyzing promising DeFi projects based on DeFilLama data | Last updated: {generated_at}</p>
         </header>
         
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value">{len(scores)}</div>
-                <div class="stat-label">分析対象プロジェクト</div>
+                <div class="stat-label">Projects Analyzed</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{len([s for s in scores if s.is_tokenless])}</div>
-                <div class="stat-label">トークン未発行</div>
+                <div class="stat-label">Tokenless</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{len([s for s in scores if s.tier1_vcs])}</div>
-                <div class="stat-label">Tier-1 VC支援</div>
+                <div class="stat-label">Tier-1 VC Backed</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{len([s for s in scores if s.total_score >= 50])}</div>
-                <div class="stat-label">高スコア (50+)</div>
+                <div class="stat-label">High Score (50+)</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{len([s for s in scores if s.is_hidden_gem])}</div>
@@ -607,34 +607,34 @@ class DashboardGenerator:
             </div>
             <div class="stat-card">
                 <div class="stat-value">{len([s for s in scores if s.high_airdrop_vcs])}</div>
-                <div class="stat-label">🔥 高エアドロVC</div>
+                <div class="stat-label">🔥 High Airdrop VC</div>
             </div>
         </div>
         
         <div class="filters">
-            <button class="filter-btn active" onclick="filterTable('all')">すべて</button>
-            <button class="filter-btn" onclick="filterTable('tokenless')">トークン未発行のみ</button>
-            <button class="filter-btn" onclick="filterTable('points')">Pointsあり</button>
+            <button class="filter-btn active" onclick="filterTable('all')">All</button>
+            <button class="filter-btn" onclick="filterTable('tokenless')">Tokenless Only</button>
+            <button class="filter-btn" onclick="filterTable('points')">Has Points</button>
             <button class="filter-btn" onclick="filterTable('hidden-gem')">💎 Hidden Gem</button>
-            <button class="filter-btn" onclick="filterTable('high-airdrop-vc')">🔥 高エアドロVC</button>
-            <button class="filter-btn" onclick="filterTable('vc')">Tier-1 VC支援</button>
-            <button class="filter-btn" onclick="filterTable('high-score')">高スコア (50+)</button>
-            <input type="text" class="search-box" placeholder="🔍 プロジェクト名で検索..." oninput="searchTable(this.value)">
+            <button class="filter-btn" onclick="filterTable('high-airdrop-vc')">🔥 High Airdrop VC</button>
+            <button class="filter-btn" onclick="filterTable('vc')">Tier-1 VC Backed</button>
+            <button class="filter-btn" onclick="filterTable('high-score')">High Score (50+)</button>
+            <input type="text" class="search-box" placeholder="🔍 Search by project name..." oninput="searchTable(this.value)">
         </div>
         
         <div class="table-container">
             <table id="projects-table">
                 <thead>
                     <tr>
-                        <th>順位</th>
-                        <th>プロジェクト</th>
-                        <th>スコア</th>
+                        <th>Rank</th>
+                        <th>Project</th>
+                        <th>Score</th>
                         <th>TVL</th>
-                        <th>7日変動</th>
-                        <th>カテゴリ</th>
-                        <th>調達額</th>
-                        <th>主要VC</th>
-                        <th>リンク</th>
+                        <th>7D Change</th>
+                        <th>Category</th>
+                        <th>Funding</th>
+                        <th>Top VCs</th>
+                        <th>Links</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -718,8 +718,8 @@ class DashboardGenerator:
         </div>
         
         <footer>
-            <p>データソース: <a href="https://defillama.com" target="_blank" style="color: var(--accent-purple);">DeFilLama</a> | 
-               Airdrop Discovery System v2.0</p>
+            <p>Data Source: <a href="https://defillama.com" target="_blank" style="color: var(--accent-purple);">DeFilLama</a> | 
+               Airdrop Discovery System v2.1</p>
         </footer>
     </div>
     

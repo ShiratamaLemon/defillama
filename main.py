@@ -21,7 +21,7 @@ def print_banner():
 ║                                                               ║
 ║   🪂  AIRDROP DISCOVERY SYSTEM  🪂                            ║
 ║                                                               ║
-║   DeFilLama データを活用した有望プロジェクト発見ツール       ║
+║   DeFilLama Data-Driven Airdrop Discovery Tool                ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
     """)
@@ -29,26 +29,26 @@ def print_banner():
 
 def test_api():
     """Test API connectivity."""
-    print("\n[Test] API接続テスト...")
+    print("\n[Test] Testing API connection...")
     client = DeFilLamaClient()
     
     try:
         protocols = client.get_protocols(use_cache=False)
-        print(f"  ✓ Protocols エンドポイント: {len(protocols)} 件取得")
+        print(f"  ✓ Protocols Endpoint: {len(protocols)} items fetched")
         
         raises = client.get_raises(use_cache=False)
-        print(f"  ✓ Raises エンドポイント: {len(raises.get('raises', []))} 件取得")
+        print(f"  ✓ Raises Endpoint: {len(raises.get('raises', []))} items fetched")
         
-        print("\n[Test] API接続テスト完了 ✓")
+        print("\n[Test] API Connection Test Passed ✓")
         return True
     except Exception as e:
-        print(f"\n[Error] API接続エラー: {e}")
+        print(f"\n[Error] API Connection Error: {e}")
         return False
 
 
 def test_scoring():
     """Test the scoring system."""
-    print("\n[Test] スコアリングテスト...")
+    print("\n[Test] Testing Scoring System...")
     client = DeFilLamaClient()
     
     protocols = client.get_protocols()
@@ -60,45 +60,45 @@ def test_scoring():
     # Score all protocols
     scores = scorer.score_all_protocols()
     
-    print(f"\n  分析対象プロトコル: {len(scores)} 件")
-    print(f"  トークン未発行: {len([s for s in scores if s.is_tokenless])} 件")
-    print(f"  Tier-1 VC支援: {len([s for s in scores if s.tier1_vcs])} 件")
-    print(f"  高スコア (50+): {len([s for s in scores if s.total_score >= 50])} 件")
+    print(f"\n  Analyzed Protocols: {len(scores)} items")
+    print(f"  Tokenless: {len([s for s in scores if s.is_tokenless])} items")
+    print(f"  Tier-1 VC Backed: {len([s for s in scores if s.tier1_vcs])} items")
+    print(f"  High Score (50+): {len([s for s in scores if s.total_score >= 50])} items")
     
-    print("\n  トップ5プロジェクト:")
+    print("\n  Top 5 Projects:")
     for i, s in enumerate(scores[:5], 1):
         tokenless_mark = "🟢" if s.is_tokenless else "⚪"
         print(f"    {i}. {tokenless_mark} {s.protocol_name} (Score: {s.total_score})")
     
-    print("\n[Test] スコアリングテスト完了 ✓")
+    print("\n[Test] Scoring Test Passed ✓")
     return True
 
 
 def generate_dashboard(open_browser: bool = True, top_n: int = 100):
     """Generate the HTML dashboard."""
-    print("\n[Dashboard] ダッシュボード生成中...")
+    print("\n[Dashboard] Generating Dashboard...")
     
     client = DeFilLamaClient()
     
-    print("  - プロトコルデータ取得中...")
+    print("  - Fetching Protocol Data...")
     protocols = client.get_protocols()
     
-    print("  - 資金調達データ取得中...")
+    print("  - Fetching Funding Data...")
     raises_data = client.get_raises()
     raises = raises_data.get("raises", [])
     
-    print("  - スコアリング実行中...")
+    print("  - Executing Scoring...")
     scorer = AirdropScorer(protocols, raises)
     scores = scorer.score_all_protocols()[:top_n]
     
-    print("  - HTML生成中...")
+    print("  - Generating HTML...")
     generator = DashboardGenerator()
     output_path = generator.save_dashboard(scores)
     
-    print(f"\n[Dashboard] 生成完了: {output_path}")
+    print(f"\n[Dashboard] Generation Complete: {output_path}")
     
     if open_browser:
-        print("[Dashboard] ブラウザで開きます...")
+        print("[Dashboard] Opening in browser...")
         webbrowser.open(f"file://{output_path.absolute()}")
     
     return output_path
@@ -151,33 +151,33 @@ def print_console_report(limit: int = 20):
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Airdrop Discovery System - 有望なエアドロップ候補を発見",
+        description="Airdrop Discovery System - Find Promising Airdrop Candidates",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-使用例:
-  python main.py                    # ダッシュボードを生成してブラウザで開く
-  python main.py --console          # コンソールでレポートを表示
-  python main.py --test-api         # API接続をテスト
-  python main.py --test-scoring     # スコアリングをテスト
-  python main.py --no-browser       # ダッシュボード生成のみ（ブラウザを開かない）
-  python main.py --clear-cache      # キャッシュをクリア
+Usage:
+  python main.py                    # Generate dashboard and open in browser
+  python main.py --console          # Show report in console
+  python main.py --test-api         # Test API connectivity
+  python main.py --test-scoring     # Test scoring system
+  python main.py --no-browser       # Generate dashboard only (do not open browser)
+  python main.py --clear-cache      # Clear cache
         """
     )
     
     parser.add_argument("--test-api", action="store_true", 
-                        help="API接続をテスト")
+                        help="Test API connectivity")
     parser.add_argument("--test-scoring", action="store_true",
-                        help="スコアリングシステムをテスト")
+                        help="Test scoring system")
     parser.add_argument("--generate-dashboard", action="store_true",
-                        help="ダッシュボードを生成")
+                        help="Generate dashboard")
     parser.add_argument("--console", action="store_true",
-                        help="コンソールにレポートを表示")
+                        help="Show report in console")
     parser.add_argument("--no-browser", action="store_true",
-                        help="ブラウザを自動で開かない")
+                        help="Do not automatically open browser")
     parser.add_argument("--clear-cache", action="store_true",
-                        help="キャッシュをクリア")
+                        help="Clear cache")
     parser.add_argument("--top", type=int, default=100,
-                        help="表示するプロジェクト数 (default: 100)")
+                        help="Number of projects to display (default: 100)")
     
     args = parser.parse_args()
     
